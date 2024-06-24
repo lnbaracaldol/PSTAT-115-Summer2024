@@ -1,0 +1,473 @@
+---
+title: 'PSTAT 115: Bayesian Data Analysis'
+author: "Professor Laura Baracaldo"
+output:
+  xaringan::moon_reader:
+    css: ['default', "xaringan_style.css"]
+    nature:
+      highlightLines: true
+      ratio: "4:3"
+---
+
+
+```{r setup, include=FALSE, warning=FALSE}
+library(knitr)
+library(ggplot2)
+opts_chunk$set(echo=FALSE, fig.align='center', out.width="70%") 
+ig <- function(file) {knitr::include_graphics(file)}
+source("../scripts/make_figs.R")
+source("../scripts/color_defs.R")
+```
+
+
+### Class Resources 
+__Required Textbook__
+
+- Bayes Rules: https://www.bayesrulesbook.com/
+
+__Course Pages__
+
+- Nectir for course related questions and discussion: https://app.nectir.io/us/ucsb/group/PSTAT115-Fall23
+
+- Gradescope: https://www.gradescope.com/courses/640308
+
+
+---
+
+### Grades
+
+- 35% - expect approximately 4 homeworks 
+
+- 20% - Midterm (Nov 1st)
+
+- 15% - Quizzes
+
+- 30% - Final exam (Dec 6th)
+
+---
+
+### Homework
+
+- There will be approximately 4 homeworks (35% of your grade total)
+
+- You will typically have 2 weeks to complete the homework
+
+- Homework turned in within 24 hrs after the deadline without prior approval will receive a 20% deduction
+
+- Homework will not be accepted more than 24 hrs late.
+
+---
+
+### Homework submission format
+
+- All code must be written to be reproducible in Rmarkdown
+
+- All derivations can be done in any format of your choosing (latex, written by hand) but must be legible and _must be integrated into your Rmarkdown pdf_.
+
+- Ask a TA _early_ if you have problems regarding submissions. 
+
+---
+
+### Software and Deliverables
+
+__Software__
+
+- [R](http://cran.r-project.org/) ([R studio](http://www.rstudio.com/))
+
+
+
+__Homeworks submission format__
+
+- Electronic submission via Gradescope
+
+- [R markdown code](http://rmarkdown.rstudio.com/)
+
+- Generated PDF file with eventual handwritten notes 
+
+---
+
+### Labs and Quizzes
+
+- There will be a handful of quizzes throughout the quarter.  
+
+- The quizzes will be on Canvas.  
+
+- You will have 10 minutes to take the quiz any time within a window of 12 hours.
+
+- The quizzes will be given on lecture days
+
+- There are no makeups, but the lowest quiz grade will be dropped from your final score.
+
+- Quizzes will be multiple choice and will test your comprehension of the basic concepts.
+
+
+---
+
+### Class Policies
+
+- All questions should be posted on nectir, _not by email_ (unless they are personal or grade-related)
+
+---
+
+### RStudio Cloud Service
+
+
+- Log on to [pstat115.lsit.ucsb.edu](https://pstat115.lsit.ucsb.edu)
+    + Cloud based rstudio service
+    + Log in with your UCSB NetID
+
+- Use [Jupyter Hub](https://pstat115.lsit.ucsb.edu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Flnbaracaldol%2FPSTAT115-F23.git&urlpath=tree%2FPSTAT115-F23.git%2F&branch=main) to sync new material (BOOKMARK THIS)
+  
+- Make sure you can write and compile an [R
+  markdown](http://rmarkdown.rstudio.com) (`Rmd`) document online
+  
+- Text formatting is minimal but
+  [syntax](http://rmarkdown.rstudio.com/authoring_pandoc_markdown.html) is
+  simple
+---
+
+### Markdown and mathematical formulas
+The text inserted between two `$` signs will be interpreted as a Latex instruction, e.g.
+`$x$`
+
+Code                                       | Rendered math 
+-------------------------------------------|-------------------------------------------
+`$x$`                                      | $x$
+`$\theta$`                                 | $\theta$
+`$x_i^2$`                                  | $x_i^2$
+`$\frac{1}{n}\sum_{i=1}^n x_i$`            | $\frac{1}{n} \sum_{i=1}^n x_i$
+`$\frac{1}{n}\sum_{i=1}^n (x_i-\bar x)^2$` | $\frac{1}{n} \sum_{i=1}^n (x_i - \bar x)^2$
+
+Rmarkdown and Latex resources:
+<li><a href="http://rmarkdown.rstudio.com/lesson-1.html" target="_blank">Introduction to RMarkdown</a></li>
+<li><a href="https://wch.github.io/latexsheet/" target="_blank">Latex cheat sheet</a></li>
+<li><a href="http://www.andy-roberts.net/writing/latex" target="_blank">Introduction to Latex</a></li>
+
+---
+
+### Other R resources
+
+- Cheatsheets: [https://www.rstudio.com/resources/cheatsheets/](https://www.rstudio.com/resources/cheatsheets/)
+
+- _An Introduction to R_ - Venables and Smith
+  
+    http://cran.r-project.org/doc/manuals/R-intro.pdf
+
+- _Using R for Introductory Statistics_ - John Verzani
+
+    http://cran.r-project.org/doc/contrib/Verzani-SimpleR.pdf
+
+- _R Markdown reference_ - https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf
+
+- Probability cheatsheet in resources folder of cloud environment
+---
+class: center, middle
+
+# What is Bayesian statistics?
+---
+class: center, middle
+# What is the version of statistics you already know?
+---
+### Frequentist statistics
+
+<center> What you learned in PSTAT 120B </center>
+<br>
+
+- Associated with the _frequentist_ interpretation of probability
+
+  + For any given event, only one of two possibilities may hold: it occurs or it does not.
+
+  + The _frequency_ of an event (in repeated experiments) is the _probability_ of the event
+
+---
+### Frequentist probability
+<center>The probability of a coin landing on heads is 50%</center>
+```{r, echo=FALSE, fig.align='center', out.width='50%'}
+n <- 1000
+plot(cumsum(rbinom(n, p=0.5, size=1))/(1:n), ylim=c(0,1), type="l", xlab="Flips", ylab="Fraction of 'heads'", col="red", lwd=2, cex.lab=1.5)
+abline(h="0.5")
+```
+<center>The long run fraction of heads is 50%</center>
+---
+### Frequentist statistics
+
+<center> What you learned in PSTAT 120B </center>
+<br>
+
+- Null Hypothesis Significant Testing (NHST) and Confidence Intervals
+    + Frequentist uncertainty premised on imaginary resampling of data
+    
+    + Example: If the null model is true, and I re-run the experiment many times, how often will I reject?
+
+---
+
+### Confidence intervals
+
+I have a $95\%$ confidence interval for a parameter $\theta$.  What does this mean?
+<!-- >- $Pr(l(Y) < \theta < u(Y)\mid \theta) = 0.95$ -->
+<!-- >- $Y$ is a random so $l(Y)$ and $u(y)$ is as well! -->
+<!-- >- $\theta$ is an unknown constant -->
+<!-- + Example: If I re-run the experiment many times what fraction of times will the interval cover the true parameter? -->
+```{r, out.width='55%'}
+prob <- 0.6
+nintervals <- 50
+sz <- 20
+counts <- rbinom(n=nintervals, size=sz, prob=prob)
+phat <- counts / sz
+
+lower <- phat - 1.96 * sqrt(phat * (1-phat) / sz)
+upper <- phat + 1.96 * sqrt(phat * (1-phat) / sz)
+
+plot(0, 0, ylim=c(-1, nintervals + 1), xlim=c(0, 1), cex=0, xlab="p", ylab="")
+segments(x0=lower, x1=upper, y0=1:nintervals, y1=1:nintervals, col=ifelse(upper < prob | lower > prob, "red", "grey"), lwd=1.5)
+abline(v=prob, col="blue")
+
+```
+We expect $0.05 \times 50 = 2.5$ of the intervals to _not_ cover the true parameter, $p = 0.6$, on average
+
+---
+
+### Hypothesis Testing
+
+```{r, out.width="60%"}
+ig("images/blackswan.jpg") ## example 1.2.2 in rethinking
+
+## Europeans had only ever seen white, went to australia saw black
+## We've rejected our null, learned something
+## Most of the time, science is not so logically dicsrete
+
+```
+<br>
+<br>
+$H_0:$ "All swans are white" vs $H_A:$ "not all swans are white".
+
+- What is the probability of rejecting the Null? -If we observe at least one back swan, we reject: Depends on how rare black swans are.
+- A more complex null hypothesis: At least 50% of swans are black.
+
+---
+
+###  Win probability
+
+```{r, out.width="60%"}
+ig("images/win_probability.png")
+```
+<center>source: fivethirtyeight.com</center>
+
+---
+###  Win probability
+
+```{r, out.width="70%"}
+ig("images/election_win_prob.png")
+```
+<center>source: fivethirtyeight.com</center>
+
+---
+
+### Bayesian probability
+
+```{r, out.height= "400px", out.width="300px"}
+ig("images/theory_of_probability.jpg")
+```
+
+<center>Bruno de Finetti begean his book on probability with:</center>
+<center>"PROBABILITY DOES NOT EXIST"</center>
+---
+### Bayesian probability
+
+- de Finetti is arguing that probability is about _belief_
+
+  + Probability doesn't exist in an _objective_ sense
+
+  + "The coin is fair" means _I believe_ that its equally likely to be heads or tails.
+
+  + "Hillary Clinton has a 71% chance to win" reflects a belief, since the election happens only once
+
+- Rarely, if ever, get _true_ replications to estimate frequentist probabilities
+
+- Bayesian idea: focus statistical practice around belief about parameters
+
+---
+### Bayesian probability
+
+<br>
+<br>
+<br>
+<br>
+
+> "The terms _certain_ and _probable_ describe the various degrees 
+> of rational belief about a proposition which different amounts 
+> of knowledge authorise us to entertain. All propositions are true 
+> or false, but the knowledge we have of them depends on our circumstances
+>
+> `r tufte::quote_footer('--- John M Keynes')`
+
+---
+
+### Perceptions of Probability
+
+```{r, out.width="70%"}
+ig("images/perceptions.png")
+```
+source: https://github.com/zonination/perceptions
+---
+
+### Why Bayesian statistics?
+
+- Classic statistical toolbox may not be appropriate for all settings.  
+
+    + Inflexible and fragile
+    + e.g. what if the assumptions of the test don't hold?
+
+- Bayesian statistics provides a procedure for building our own tests / tools.
+
+    + Design, build and refine procedures for you own models.
+
+- A variety of powerful tools for inference with computer simulation
+
+- Philosophy of science: quantifying degrees of belief often a more useful perspective than falsification
+
+---
+
+### Setup
+
+- The _sample space_ $\mathcal{Y}$ is the set of all possible datasets.  
+    + $Y$ is a random variable with support in $\mathcal{Y}$
+    + We observe one dataset $y$ from which we hope to learn about the world.  
+
+- The _parameter space_ $\Theta$ is the set of all possible parameter values $\theta$
+
+- $\theta$ encodes the population characteristics that we want to learn about!
+
+---
+
+### Three steps of Bayesian data analysis
+
+1. Construct a plausible probability model governed by parameters $\theta$
+
+    + This includes specifying your belief about $\theta$ before seeing data (_the prior_)
+
+2. Condition on the observed data and compute _the posterior_ distribution for $\theta$
+
+3.  Evaluate the model fit, revise and extend.  Then repeat.
+
+---
+### Bayesian Inference in a Nutshell
+
+1.  The _prior distribution_ $p(\theta)$ describes our belief about the true population characteristics, for each value of $\theta \in \Theta$.
+
+2.  Our _sampling model_ $p(y\mid \theta)$ describes our belief about what data we are likely to observe if $\theta$ is true.  
+
+3.  Once we actually observe data, $y$, we update our beliefs about $\theta$ by computing _the posterior distribution_ $p(\theta \mid y)$.  We do this with Bayes' rule!
+
+<br>
+&nbsp;&nbsp;&nbsp; **Key difference: $\theta$ is random!**
+
+---
+### Bayes' Rule
+
+$$ P(A \mid B) = \frac{P(B \mid A)P(A)}{P(B)}$$
+
+- $P(A \mid B)$ is the conditional probability of A given B
+- $P(B \mid A)$ is the conditional probability of B given A
+- $P(A)$ and $P(B)$ are called the marginal probability of A and B (unconditional)
+---
+
+### Bayes' Rule for Bayesian Statistics
+
+$$ P(\theta \mid y) = \frac{P(y \mid \theta)P(\theta)}{P(y)}$$
+
+
+- $P(\theta \mid y)$ is the posterior distribution
+
+- $P(y \mid \theta)$ is the likelihood
+
+- $P(\theta)$ is the prior distribution
+
+- $P(y) = \int_\Theta p(y\mid \tilde \theta)p(\tilde \theta) d\tilde \theta$ is the model evidence 
+
+---
+
+### Bayes' Rule for Bayesian Statistics
+
+$$P(\theta \mid y) = \frac{P(y \mid \theta)P(\theta)}{P(y)}\propto P(y \mid \theta)P(\theta)$$
+
+- Start with a subjective belief (prior)
+
+- Update it with evidence from data (likelihood)
+
+- Summarize what you learn (posterior)
+
+---
+
+### Example: Estimating COVID Infection Rates 
+
+- We need to estimate the prevalence of a COVID in Isla Vista
+
+- Get a small random sample of 20 individuals to check for infection
+
+```{r}
+ig("images/covid.jpg")
+```
+
+---
+
+### Example: Estimating Infection Rates 
+
+- $\theta$ represents the population fraction of infected
+
+- $Y$ is a random variable reflecting the number of infected in the sample
+
+- $\Theta = [0,1] \quad \mathcal{Y} = \{0,1 , \ldots , 20 \}$
+
+- Sampling model: $Y \sim \text{Binom}(20, \theta)$
+
+---
+### Example: Estimating Infection Rates 
+
+```{r, out.width="50%"}
+par(cex = 1.5)
+fig_1_1_a(cols5[1:3])
+```
+
+---
+
+### Example: Estimating Infection Rates 
+
+- Assume _a priori_ that the population rate is low 
+        
+    + The infection rate in comparable cities ranges from about 0.05 to 0.20
+    
+- Assume we observe $Y = 0$ infected in our sample
+
+- What is our estimate of the true population fraction of infected individuals?
+
+---
+
+## Example: Estimating Infection Rates 
+
+```{r, out.width="50%"}
+par(cex = 1.5)
+fig_1_1_b(cols2)
+```
+
+---
+### Tentative syllabus
+
+- One parameter models (binomial, poisson, and normal)
+
+- Monte Carlo methods (i.e. simulation-based inference)
+
+- Markov chain Monte Carlo (MCMC)
+
+- Hierarchical modeling
+
+- An introduction to probabilistic programming
+
+---
+### Assignment
+
+- Check Nectir, bookmark important links
+
+- Start reviewing probability cheat sheet!
+
+- Read chapters 1 and 2 of Bayes Rules
